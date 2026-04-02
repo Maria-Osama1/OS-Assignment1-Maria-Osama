@@ -30,11 +30,11 @@ class Process implements Runnable {
     private int timeQuantum; // Time slice (time quantum) allowed per CPU access (in milliseconds)
     private int remainingTime; // Time left for the process to finish its execution
 
-    int priority;
+    int priority; // Add a priority field to the Process class
 
-    long creationTime;
-    long lastEnterQueueTime;
-    long waitingTime;
+    long creationTime; // Time when the process was created
+    long lastEnterQueueTime; //Last time the process entered the ready queue
+    long waitingTime; //Total accumulated waiting time for the process
 
     // Constructor to initialize the process with name, burst time, and time quantum
     public Process(String name, int burstTime, int timeQuantum, int priority) {
@@ -45,6 +45,7 @@ class Process implements Runnable {
 
         this.priority = priority;
 
+        // Initialize timing variables for waiting time calculation
         this.creationTime = System.currentTimeMillis();
         this.lastEnterQueueTime = creationTime;
         this.waitingTime = 0;
@@ -166,7 +167,7 @@ class Process implements Runnable {
 }
 
 public class SchedulerSimulation {
-    static int contextSwitches = 0;
+    static int contextSwitches = 0; // Counter to track the number of context switches between processes
 
     public static void main(String[] args) {
         // ⚠️ IMPORTANT: Put your student ID here to seed the random number generator
@@ -219,7 +220,7 @@ public class SchedulerSimulation {
         // Create 'numProcesses' number of processes
         for (int i = 1; i <= numProcesses; i++) {
 
-            int priority = random.nextInt(5) + 1;
+            int priority = random.nextInt(5) + 1; //Generate random priorities between 1 and 5  
 
             // Random burst time for each process between timeQuantum/2 and 3*timeQuantum
             int burstTime = timeQuantum / 2 + random.nextInt(2 * timeQuantum + 1);
@@ -267,10 +268,12 @@ public class SchedulerSimulation {
             System.out.println(Colors.BOLD + Colors.MAGENTA + "└" + "─".repeat(79) + Colors.RESET + "\n");
 
             Process process = processMap.get(currentThread);
+
+            //Calculate waiting time before execution and accumulate it
             long now = System.currentTimeMillis();
             process.waitingTime += (now - process.lastEnterQueueTime);
 
-            contextSwitches++;
+            contextSwitches++; // Increment the counter each time a new process starts running
 
             // Start the thread, which will run the process for one time quantum
             currentThread.start();
@@ -311,8 +314,11 @@ public class SchedulerSimulation {
         System.out.println(Colors.BOLD + Colors.BRIGHT_GREEN +
                 "╚════════════════════════════════════════════════════════════════════════════════╝" +
                 Colors.RESET + "\n");
-        System.out.println("\nTotal context switches: " + contextSwitches);
 
+
+        System.out.println("\nTotal context switches: " + contextSwitches); //Display total context switches at the end of simulation 
+
+        //Display summary of waiting time for all processes
         System.out.println("\nProcess Summary:");
         System.out.println("Name\tBurst\tWaiting");
 
@@ -328,7 +334,8 @@ public class SchedulerSimulation {
         // Create a new thread to run the process
         Thread thread = new Thread(process);
 
-        process.lastEnterQueueTime = System.currentTimeMillis();
+        process.lastEnterQueueTime = System.currentTimeMillis();//Record the time when process enters the ready queue
+
         // Add the thread to the ready queue
         processQueue.add(thread);
 
@@ -336,7 +343,7 @@ public class SchedulerSimulation {
         // each thread
         processMap.put(thread, process);
 
-        // Print a message indicating the process has entered the ready queue
+        // Print a message indicating the process has entered the ready queue, Display priority when a process enters the ready queue
         System.out.println(Colors.BLUE + "  ➕ " + Colors.BOLD + Colors.CYAN + process.getName() +
                 " (Priority: " + process.getPriority() + ")" +
                 Colors.RESET + Colors.BLUE + " added to ready queue" + Colors.RESET +
